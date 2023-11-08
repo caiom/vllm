@@ -31,6 +31,7 @@ class EngineArgs:
     revision: Optional[str] = None
     tokenizer_revision: Optional[str] = None
     quantization: Optional[str] = None
+    custom_worker_cls: Optional[str] = None
 
     def __post_init__(self):
         if self.tokenizer is None:
@@ -190,7 +191,8 @@ class EngineArgs:
             getattr(model_config.hf_config, 'sliding_window', None))
         parallel_config = ParallelConfig(self.pipeline_parallel_size,
                                          self.tensor_parallel_size,
-                                         self.worker_use_ray)
+                                         self.worker_use_ray,
+                                         self.custom_worker_cls)
         scheduler_config = SchedulerConfig(self.max_num_batched_tokens,
                                            self.max_num_seqs,
                                            model_config.max_model_len)

@@ -242,10 +242,12 @@ class ParallelConfig:
         pipeline_parallel_size: int,
         tensor_parallel_size: int,
         worker_use_ray: bool,
+        custom_worker_cls,
     ) -> None:
         self.pipeline_parallel_size = pipeline_parallel_size
         self.tensor_parallel_size = tensor_parallel_size
         self.worker_use_ray = worker_use_ray
+        self.custom_worker_cls = custom_worker_cls
 
         self.world_size = pipeline_parallel_size * tensor_parallel_size
         if self.world_size > 1:

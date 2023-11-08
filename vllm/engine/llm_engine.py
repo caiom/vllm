@@ -126,12 +126,15 @@ class LLMEngine:
         # Lazy import the Worker to avoid importing torch.cuda/xformers
         # before CUDA_VISIBLE_DEVICES is set in the Worker
         from vllm.worker.worker import Worker  # pylint: disable=import-outside-toplevel
+        worker_cls = Worker
+        if self.parallel_config.custom_worker_cls is not None:
+            worker_cls = self.parallel_config.custom_worker_cls
 
         assert self.parallel_config.world_size == 1, (
             "Ray is required if parallel_config.world_size > 1.")
 
-        self.workers: List[Worker] = []
-        worker = Worker(
+        self.workers: List[worker_cls] = []
+        worker = worker_cls(
             self.model_config,
             self.parallel_config,
             self.scheduler_config,
@@ -149,8 +152,11 @@ class LLMEngine:
         # Lazy import the Worker to avoid importing torch.cuda/xformers
         # before CUDA_VISIBLE_DEVICES is set in the Worker
         from vllm.worker.worker import Worker  # pylint: disable=import-outside-toplevel
+        worker_cls = Worker
+        if self.parallel_config.custom_worker_cls is not None:
+            worker_cls = self.parallel_config.custom_worker_cls
 
-        self.workers: List[Worker] = []
+        self.workers: List[worker_cls] = []
         for bundle in placement_group.bundle_specs:
             if not bundle.get("GPU", 0):
                 continue
@@ -171,7 +177,7 @@ class LLMEngine:
         scheduler_config = copy.deepcopy(self.scheduler_config)
         self._run_workers("init_worker",
                           get_all_outputs=True,
-                          worker_init_fn=lambda: Worker(
+                          worker_init_fn=lambda: worker_cls(
                               model_config,
                               parallel_config,
                               scheduler_config,
