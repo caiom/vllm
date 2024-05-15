@@ -307,17 +307,6 @@ class LlamaModel(nn.Module):
 
 
 class LlamaForCausalLM(nn.Module):
-    packed_modules_mapping = {
-        "qkv_proj": [
-            "q_proj",
-            "k_proj",
-            "v_proj",
-        ],
-        "gate_up_proj": [
-            "gate_proj",
-            "up_proj",
-        ],
-    }
 
     # LoRA specific attributes
     supported_lora_modules = [
@@ -333,6 +322,23 @@ class LlamaForCausalLM(nn.Module):
         "lm_head": "output_embeddings",
     }
     embedding_padding_modules = ["lm_head"]
+
+    @property
+    def packed_modules_mapping(self):
+        if "Phi3ForCausalLM" in self.config.architectures:
+            return {}
+
+        return {
+            "qkv_proj": [
+                "q_proj",
+                "k_proj",
+                "v_proj",
+            ],
+            "gate_up_proj": [
+                "gate_proj",
+                "up_proj",
+            ],
+        }
 
     def __init__(
         self,
